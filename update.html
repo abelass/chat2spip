@@ -1,0 +1,89 @@
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+#CACHE{0}
+<?php 
+
+  //  CONSIDER THIS SECURITY MEASURE ON WHERE THE
+  //  FILE CAN ONLY BE CALLED VIA AJAX AND FROM SPECIFIC LOCATIONS
+  // 
+ if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_REFERER']!="'#URL_PAGE{chat_js}'") {
+     die();
+  } 
+
+?>
+  
+  
+<?php
+
+function filtrer_today($matches){
+	
+	$today=date('Y-m-d');
+	$date=trim($matches[1]);
+	if($today==$date)$date='aujourd\'hui';
+  // as usual: $matches[0] is the complete match
+  // $matches[1] the match for the first subpattern
+  // enclosed in '(...)' and so on
+  return "<span class='date'>$date :</span>";
+} 
+	 
+
+    function getfile($f) {
+    
+    	if (file_exists($f)) {
+            $lines = file($f);
+        }	
+        
+        return $lines; 
+        
+    }
+    
+    function getlines($fl){
+          return count($fl);	
+    }
+    
+    $state = htmlentities(strip_tags($_GET['state']), ENT_QUOTES);
+    $file = htmlentities(strip_tags($_GET['file']), ENT_QUOTES);
+    
+    			
+    $finish = time() + 50;
+    $count = getlines(getfile($file));
+    
+    while ($count <= $state) {
+    
+        $now = time();
+        usleep(10000);
+        
+        if ($now <= $finish) {
+            $count = getlines(getfile($file));
+        } else {
+            break;	
+        }  
+         
+    }		 
+    
+    if ($state == $count) {
+    
+        $log['state'] = $state;
+        $log['t'] = "continue";
+        
+    } else {
+    
+        $text= array();
+        $log['state'] = $state + getlines(getfile($file)) - $state;
+        
+        
+        if(is_array(getfile($file))){
+			foreach (getfile($file) as $line_num => $line) {
+				if ($line_num >= $state) {
+					$line=preg_replace_callback("#\<span class='date'\>(.+?)\<\/span\>#s","filtrer_today",$line);
+					$text[] =  $line = str_replace("\n", "", $line);
+				}
+		
+				$log['text'] = $text; 
+			}
+      }
+    }
+    
+    echo json_encode($log);	
+	 
+  
+?>

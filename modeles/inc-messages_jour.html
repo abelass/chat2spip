@@ -1,0 +1,16 @@
+#SET{date_fin,(#DATE|affdate{'Y-m-d 24:00:00'})}
+#SET{date_debut,(#DATE|affdate{'Y-m-d 00:00:00'})}
+
+
+<B_messages_jour>
+	<ul>
+	<BOUCLE_messages_jour(CHAT_MESSAGES){date>=#GET{date_debut}}{date<=#GET{date_fin}}>	
+	[		#SET{donnees,(#INCLURE{fond=modeles/inc-messages_jour_login}{login}{date_debut=#GET{date_debut}}{date_fin=#GET{date_fin}}|unserialize)}	
+	<li>
+		<span class="login">(#LOGIN|unique{#GET{date_debut}}) : </span>
+		<span class="periode">[(#GET{donnees}|table_valeur{compteur})] messages entre [(#GET{donnees}|table_valeur{date_debut}|affdate{'G:i:s'})] et [(#GET{donnees}|table_valeur{date_fin}|affdate{'G:i:s'})]</span>
+		
+	</li>]
+	</BOUCLE_messages_jour>
+	</ul>
+</B_messages_jour>

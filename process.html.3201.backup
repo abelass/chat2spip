@@ -1,0 +1,101 @@
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+
+<?php
+$file=find_in_path(_request('file'));
+$function=_request('function');
+
+
+
+  $log = array();
+
+    switch ($function) {
+    
+    	 case ('getState'):
+    	 
+        	 if (file_exists($file)) {
+               $lines = file($file);
+        	 }
+             $log['state'] = count($lines);
+   
+        	 break;	
+        	 
+    	 case ('send'):
+		include_spip('inc/session');
+    	 	
+    	 	$chemin='img_pack/smiles/';
+
+    	 
+		     $nickname = _request('nickname');
+
+		     $patterns = array("/:\)/", "/:D/", "/:p/", "/:P/", "/:\(/","/angel/","/;\)/","/\(blush\)/","/\(puke\)/","/\<3/","/\:S/","/\(devil\)/");
+		 	$replacements = array(
+		 		'<img src="'.find_in_path($chemin.'happy.png').'"/>', 
+		 		'<img src="'.find_in_path($chemin.'grin.png').'"/>', 
+		 		'<img src="'.find_in_path($chemin.'tongue.png').'"/>', 
+		 		'<img src="'.find_in_path($chemin.'tongue.png').'"/>', 
+		 		'<img src="'.find_in_path($chemin.'sad.png').'"/>',
+		 		'<img src="'.find_in_path($chemin.'angel.png').'"/>',	
+		 		'<img src="'.find_in_path($chemin.'winky.png').'"/>'	,
+		 		'<img src="'.find_in_path($chemin.'shame.png').'"/>'	,
+		 		'<img src="'.find_in_path($chemin.'cha-ching.png').'"/>',	
+		 		'<img src="'.find_in_path($chemin.'heart.png').'"/>',	
+		 		'<img src="'.find_in_path($chemin.'worried.png').'"/>',	
+		 		'<img src="'.find_in_path($chemin.'devil.png').'"/>',	
+		 		);
+			 $reg_exUrl = "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/";
+			 $blankexp = "/^\n/";
+			 $message = utf8_encode(_request('message'));
+    		 if (!preg_match($blankexp, $message)) {
+            	
+    			 if (preg_match($reg_exUrl, $message, $url)) {
+           			$message = preg_replace($reg_exUrl, '<a href="'.$url[0].'" target="_blank">'.$url[0].'</a>', $message);
+    			 } 
+    			 $message = preg_replace($patterns, $replacements, $message);
+            	
+            	 fwrite(fopen($file, 'a'), "<span>". $nickname . "</span>" . $message = str_replace("\n", " ", $message) . "\n"); 
+    		 }
+    		 
+
+    		
+		$login_session=session_get('login');
+		$login_utilisateur=_request('login_utilisateur');
+		$fichier=str_replace('IMG/chatrooms/','',$file);
+		
+
+		$session=sql_fetsel('id_utilisateur,avis_chat','spip_chat_utilisateurs','login='.sql_quote($login_session));
+		$salons=sql_getfetsel('salons','spip_chat_utilisateurs','login='.sql_quote($login_utilisateur));
+		
+		$id_salon=sql_getfetsel('id_salon','spip_chat_salons','fichier='.sql_quote($fichier));
+		
+
+		
+		$id_session=$session['id_utilisateur'];
+		if($salons)$salons=unserialize($salons);
+		else $salons=array();
+		
+	
+		if(!$salons['actif']){echo '1';
+			$salons['actif']=$id_salon;
+			$set=array('salons'=>serialize($salons));
+			}
+		elseif($salons['actif']!=$id_salon){echo '2';
+			if($avis_chat){
+				$avis_chat=unserialize($avis_chat);
+				if(!in_array($id_session,$avis_chat)){
+					$avis_chat=array_merge(array(0=>$id_session),$avis_chat);
+					}
+				}
+			else {echo '3';
+				$avis_chat=array(0=>$id_session);
+				$set=array('avis_chat'=>serialize($avis_chat));
+				}
+		}
+		else echo 4;
+		
+			if($set)sql_updateq('spip_chat_utilisateurs',$set,'login='.sql_quote($login_utilisateur));
+    		 
+        	break;
+    	
+    }
+    echo json_encode($log);
+?>

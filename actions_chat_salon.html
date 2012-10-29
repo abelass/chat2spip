@@ -1,0 +1,127 @@
+#CACHE{0}
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+<?php
+
+// Sécurité
+if (!defined('_ECRIRE_INC_VERSION')) return;
+
+
+	$args=_request('args');
+
+	// On récupère les infos de l'argument
+	@list($action, $id_salon,$id_utilisateur,$option) = explode('|', $args);
+
+	include_spip('inc/session');
+
+	switch($action){
+		case 'fermer':
+		
+
+			$login=session_get('login');
+			$donnes_tables=donnes_session('',$login);
+			
+			if($salons=$donnes_tables['salons']){
+				if(!is_array($salons))$salons=unserialize($donnes_tables['salons']);
+				}
+			else $salons=array();
+						
+			$salons['actif']='';
+
+			sql_updateq('spip_chat_utilisateurs',array('salons'=>serialize($salons)),'login='.sql_quote($login));
+	
+		break;
+		
+		case 'ouvrir':
+
+			$utilisateur=donnes_session();
+			$utilisateur['salons']['actif']=$id_salon;
+		
+
+		break;
+		
+		case 'ouvrir_salon':
+			include_spip('chat2spip_fonctions');
+			$login_session=session_get('login');
+			
+			
+			if($option =='enlever_avis'){
+				$avis_chat=sql_getfetsel('avis_chat','spip_chat_utilisateurs','login='.sql_quote($login_session));
+				if($avis_chat){
+					$avis_chat=unserialize($avis_chat);
+					$avis=array();
+					
+					foreach($avis_chat AS $key=>$var) 
+						if(!in_array($id_utilisateur,$avis_chat))$avis[$key]=$var;
+					}
+				
+					$avis=serialize($avis);
+
+					sql_updateq('spip_chat_utilisateurs',array('avis_chat'=>$avis),'login='.sql_quote($login_session));
+				}
+		
+
+			
+			
+			if($id_salon=='new') $id_salon=creer_salon($id_utilisateur,'',$login_session);
+
+			$ouvrir_salon=array(
+						$id_utilisateur=>$id_salon
+						);
+
+			$salons=sql_getfetsel('salons','spip_chat_utilisateurs','login='.sql_quote($login_session));
+
+			
+			if($salons)$salons=unserialize($salons);
+			else $salons=array();
+			
+			$salons['actif']=$id_salon;
+			
+			sql_updateq('spip_chat_utilisateurs',array('salons'=>serialize($salons)),'login='.sql_quote($login_session));
+			
+			
+			
+		break;		
+		
+		case 'eliminer':
+			include_spip('inc/session');
+	
+			//$utilisateur=donnes_session($nom_cookie);
+			$utilisateur=donnes_session();
+
+			if(is_array($utilisateur['salons']['salons_ouverts'])){
+				foreach($utilisateur['salons']['salons_ouverts'] AS $key=>$var){
+					if($var= $id_salon)unset($utilisateur['salons']['salons_ouverts'][$key]);
+					}
+				}
+				
+
+			if($utilisateur['salons'])$salons=serialize($utilisateur['salons']);
+			else $salons=array();
+			
+			$salons['actif']='';
+			include_spip('inc/session');
+			sql_updateq('spip_chat_utilisateurs',array('salons'=>serialize($salons)),'login='.sql_quote(session_get('login')));
+
+
+		break;		
+		
+	}
+	return;
+
+	
+function donnes_session($nom_cookie='',$login=''){
+	if(!$login){
+		include_spip('inc/session');
+
+		$utilisateur=sql_fetsel('salons,amies,bloques,statut','spip_chat_utilisateurs','login='.sql_quote(session_get('login')));
+
+		$utilisateur=unserialize($utilisateur);
+		}
+	else $utilisateur=sql_fetsel('salons,amies,bloques,statut','spip_chat_utilisateurs','login='.sql_quote($login));
+		
+	return $utilisateur;
+	}
+	
+
+	
+?>

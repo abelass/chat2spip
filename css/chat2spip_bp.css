@@ -1,0 +1,67 @@
+.chat_inactive span,h3.fermer,.ouvrir_salon,.devenir_amie, .voir_amies, .voir_tous, .voir_bloques,.statut,.detail_utilisateur,.voir h3 span {cursor:pointer}
+
+#chat-box{
+	position:fixed;
+ 	 right: 10px;
+ 	 bottom: 10px;
+  	border: 1px solid  #f18519;
+ 	 padding:5px;
+	background-color: #f5f5f5;
+ 	z-index: 1000;
+}
+
+.chat-wrap{padding:0}
+
+.chat-area p{width:200px;}
+
+.chat-area span.nick{
+font-size:14px; margin-right:5px;
+}
+
+.chat-area {
+ max-height: 300px; 
+ overflow: auto; 
+ color:black;
+ width:220px;
+padding:5px 0 5px 5px;
+	font-size:12px;
+	text-align:left;
+}
+
+.chat_inactive{
+
+background-color: #f18519;
+
+}
+
+#box_user_list{
+position:fixed;
+  bottom: 10px;
+   border: 1px solid  #f18519;
+  padding:5px;
+	background-color: #f5f5f5;
+	width:200px;
+	   z-index: 1000;
+	   color:black;
+	text-align:left;
+ 
+}
+
+#userlist{
+   border: 1px solid  #f18519;
+   padding:1px;
+   }
+   
+#userlist img{ margin-right:2px;}
+
+div.detail_utilisateur span{display:none;}
+
+div.detail_utilisateur:hover{display:block;}
+
+div.detail_utilisateur:hover span{display:inline;}
+
+div.detail_utilisateur:hover img.icone{display:none;}
+
+.smiley_bar {width:160px;}
+  
+

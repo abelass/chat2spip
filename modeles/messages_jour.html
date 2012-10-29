@@ -1,0 +1,10 @@
+<B_messages_jour>
+	<p class="pagination">#PAGINATION</p>
+	<BOUCLE_messages_jour(CHAT_MESSAGES){!par date}{pagination 500}>
+	[<h3>(#DATE|affdate{'Y-m-d'}|unique)</h3>
+		<INCLURE{fond=modeles/inc-messages_jour}{date}/>
+		]
+	</BOUCLE_messages_jour>
+	
+</B_messages_jour>
+

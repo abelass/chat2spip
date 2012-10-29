@@ -1,0 +1,16 @@
+[(#SESSION{id_comedien}|oui)
+	<link rel="stylesheet" type="text/css" href="#CHEMIN{css/chat2spip.css}" />
+	<script type="text/javascript" src="#URL_PAGE{chat_js}"></script>
+	<script type="text/javascript" src="[(#URL_PAGE{settings}|parametre_url{id_salon,[(#VAL{salon_actif}|session_chat)]})]"></script>
+	
+	[(#REM)script du chat]
+	
+	  <script type="text/javascript">
+		var chat = new Chat('[(#VAL{salon_actif}|session_chat|get_file{id_salon})]','[(#VAL{salon_actif}|session_chat)]','[(#VAL{salons}|session_chat|implode{|})]','#SELF');
+		chat.init();
+		var name = '#SESSION{login}';
+		chat.getUsers('#ENV{nom}','#SESSION{login}' );	
+	 </script>	
+	]
+
+		    	

@@ -1,0 +1,216 @@
+[(#HTTP_HEADER{Content-type: application/javascript[; charset=(#CHARSET)]})]
+
+$(function() {
+ 
+    $("#sendie").keydown(function(event) {  
+    $("#sendie").die("click");
+        var key = event.which;  
+   
+         // all keys including return 
+         if (key >= 33) {  
+         
+             var maxLength = $(this).attr("maxlength");  
+             var length = this.value.length;  
+             if (length >= maxLength) {  
+                 event.preventDefault();  
+             }  
+         }  
+																															});
+			 
+       $('#sendie').live('keyup',function(e) {	
+			 
+            if (e.keyCode == 13) { 
+                var text = $(this).val();
+                var maxLength = $(this).attr("maxlength");  
+                var login_utilisateur = $(this).attr('login_utilisateur'); 
+                            
+                var length = text.length; 
+
+
+                if (length <= maxLength + 1) {  
+                    chat.send(text,name, login_utilisateur);	
+                    $(this).val("");
+                } else {
+                    $(this).val(text.substring(0, maxLength));
+                }	
+            
+            }
+            
+        });
+        
+   // ouvrir fenêtre chat
+   
+
+	$('span.ouvrir_salon').live('click', function() {	
+		var vars = this.id; 
+		var exploded = vars.split('-');	
+		 if(update_message){
+	           update_message.abort();
+	        }
+	//alert(update_message.readystate)
+
+		if(!update_message || !update_message.readystate || update_message.readystate==0){
+			if(userlist)userlist.abort();
+			var  args='ouvrir_salon|' + exploded[1]+ '|' + exploded[3] + '|' +exploded[4];
+			actions(args);
+			var chat = new Chat(exploded[0],exploded[1],exploded[2]);
+			chatInit()
+			
+			//alert(update_message.readystate)
+			getuserlist('','#SESSION{login}','ok')
+		
+			$('#box_user_list_invisible').removeClass('active').addClass('inactive');
+			$.cookie('alerter','');	
+		}
+	}); 
+
+
+ 
+   // fermer fenêtre chat
+$("h3.fermer").live('click', function() {
+ 	var vars = this.id; 
+ 	var exploded = vars.split('-');
+ 	update_message.abort()
+ 	var chat = new Chat('nothing','0',exploded[2]);
+	chat.init();
+ 	var  args='fermer|' + exploded[1];
+ 	chat.action(args);			
+ });    
+ 
+// fermer le chat
+$("span.eliminer").live('click', function() {
+	$("span.eliminer").die("click");
+ 	var vars = this.id; 
+ 	var exploded = vars.split('-');
+ 	var chat = new Chat(0,0,0);
+ 	update_message.abort()
+	chat.init();
+ 	var  args='eliminer|' + exploded[1];
+ 	chat.action(args);	
+ 	chat.initSalons();	
+ });  
+ 
+// fermer userlist
+$('.fermer_userlist').live('click', function()  {
+  $('#box_user_list_visible').hide('slow');
+  //$('#chat-box').hide('slow');
+  $('#box_user_list_invisible').show('slow');
+  $('.ouvrir_userlist').show();
+  $.cookie('voir_utilisateurs','ferme', {expires: 7,path: '/'});
+      
+});
+ 
+// ouvrir userlist
+$('.ouvrir_userlist').live('click', function() {
+  $('#box_user_list_visible').show('slow');
+  //$('#chat-box').show('slow');
+  $('#box_user_list_invisible').hide('slow');
+  $.cookie('voir_utilisateurs','ouvert', {expires: 7,path: '/'});   
+});
+
+// teste si la liste des utilisateurs est ouverte
+$(document).ready(function() {
+
+	var check_cookie = $.cookie('voir_utilisateurs');
+	
+	if(check_cookie == 'ferme'){	
+		$('#box_user_list_visible').hide();
+		//$('#chat-box').hide();
+		$('#box_user_list_invisible').show();
+		$('.ouvrir_userlist').show();
+		}		
+});
+ // changer statut
+$("span.statut").live('click',function() {
+ 	var vars = this.id; 
+ 	chat.action_utilisateurs('changer_statut|rien|'+ vars)
+	$(".voir").load('[(#URL_PAGE{user_tools})]');
+ });    
+ 
+/*  désactivés pour le moment
+
+
+ 
+// voire tous les utilisateurs
+$("div.voir_tous").live('click',function() {
+ 	chat.action_utilisateurs('changer_vue|rien|tous')
+
+ 	userlist.abort()
+ 	getuserlist('','#SESSION{login}','ok')
+	$(".voir").load('[(#URL_PAGE{user_tools})]');
+ });  
+  
+ // voire tous les bloques
+$("div.voir_bloques").live('click',function() {
+
+ 	chat.action_utilisateurs('changer_vue|rien|bloques')
+ 	userlist.abort()
+ 	getuserlist('','#SESSION{login}','ok')
+	$(".voir").load('[(#URL_PAGE{user_tools})]');
+ });  
+  
+ // voir les amies
+ 
+ 
+$("div.voir_amies").live('click',function() {
+
+ 	chat.action_utilisateurs('changer_vue|rien|amies')
+ 	userlist.abort()
+ 	getuserlist('','#SESSION{login}','ok')
+	$(".voir").load('[(#URL_PAGE{user_tools})]');
+ });  
+   */
+ // devenir amie
+	$('span.devenir_amie').live('click', function() {	
+		var vars = this.id; 
+		var exploded = vars.split('-');
+		var  args='devenir_amie|' + exploded[1];
+		chat.action_utilisateurs(args);
+ 		userlist.abort()
+		getuserlist('','#SESSION{login}','ok')
+					
+	}); 
+	  
+	  
+ // enlever_amie
+	$('span.enlever_amie').live('click', function() {	
+		var vars = this.id; 
+		var exploded = vars.split('-');
+		var  args='enlever_amie|' + exploded[1];
+		chat.action_utilisateurs(args);
+ 		userlist.abort()
+		getuserlist('','#SESSION{login}','ok')
+					
+	});  
+	
+ // bloquer_utilisateur
+	$('span.bloquer_utilisateur').live('click', function() {	
+		var vars = this.id; 
+		var exploded = vars.split('-');
+		var  args='bloquer_utilisateur|' + exploded[1];
+		chat.action_utilisateurs(args);
+ 		userlist.abort()
+		getuserlist('','#SESSION{login}','ok')
+					
+	});
+	  	
+ // debloquer_utilisateur
+	$('span.debloquer_utilisateur').live('click', function() {	
+		var vars = this.id; 
+		var exploded = vars.split('-');
+		var  args='debloquer_utilisateur|' + exploded[1];
+		chat.action_utilisateurs(args);
+ 		userlist.abort()
+		getuserlist('','#SESSION{login}','ok')
+					
+	});	  	
+	
+
+// les smileys
+
+$('.smiley').live('click',function() //this will apply to all anchor tags
+{ 
+	var val = this.id; 
+   	$('#sendie').val($('#sendie').val()+val); 
+})
+});

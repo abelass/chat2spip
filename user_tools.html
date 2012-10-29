@@ -1,0 +1,23 @@
+#CACHE{0}
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+#SET{session_chat,#VAL{salon_actif}|session_chat}
+<BOUCLE_art(CHAT_UTILISATEURS){login=#SESSION{login}}>
+	<h3> [(#REM)desactivé
+	Voir <span class="voir_actif">
+	[(#VUE|=={amies}|oui)les amis]
+	[(#VUE|=={bloques}|oui)les bloques]	
+	[(#VUE|=={tous}|oui)tous]</span>		]
+	<span   class="statut" id="[(#STATUT|=={1}|?{3,1})]" >
+		<img src="[(#CHEMIN{img_pack/statut_[(#STATUT)].png})]" alt="statut"/>
+		<span class="nom">[(#SESSION{nom})]</span>
+		[<small>(#STATUT|=={1}|oui)(Disponible)</small>]	
+		[<small>(#STATUT|=={3}|oui)(Invisible)</small>]		
+		</span>
+		<span class="fermer_userlist">X</span>		
+	</h3>
+	[(#REM)desactivé
+	[(#VUE|=={amies}|non)<div class="voir_amies">les amis</div>]
+	[(#VUE|=={tous}|non)<div class="voir_tous">tous</div>]
+	[(#VUE|=={bloques}|non)<div class="voir_bloques">les bloqués</div>]	
+	]
+</BOUCLE_art>

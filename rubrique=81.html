@@ -1,0 +1,96 @@
+#CACHE{0}
+#SET{url,#URL_SITE_SPIP}
+
+[(#SESSION{id}|non)#EVAL{header('Location: #URL_SITE_SPIP?var_mode=calcul');}]
+
+<?php
+include_spip('inc/start');
+
+  	$id=session_get('id');
+  	$comedien=session_get('comedien');
+  	$login=session_get('login_comedien');
+  	$nom_complet=session_get('nom_complet');  
+  	$logincvid=session_get('logincvid');  
+	$profil_url=session_get('profil_url'); 
+	$statut=session_get('statut_comedien'); 
+if ( !isset($_GET['id']) && isset($logincvid) )
+
+  $_GET['id'] = $logincvid;
+
+$id = $_GET['id'];
+if ($comedien)
+  unset($cie);
+else
+  $cie = TRUE;
+?>
+
+			[(#SESSION{utilisateur_chat}|non)
+				[(#SESSION{login}|jumpin)]
+				]
+<BOUCLE_princ(RUBRIQUES){id_rubrique=81}>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=100" />
+
+    <INCLURE{fond=inc/header_mur}{id_rubrique}>
+
+ 	
+    <link rel="stylesheet" type="text/css" href="squelettes/style_mur.css" />
+      <link rel="stylesheet" type="text/css" href="#CHEMIN{css/chat2spip.css}" />
+	<script type="text/javascript" src="#URL_PAGE{chat_js}"></script>
+  </head>
+
+<!--[if lt IE 7]> <body class="ie ie6" onload="start_javascript();"> <![endif]-->
+<!--[if IE 7]>    <body class="ie ie7" onload="start_javascript();"> <![endif]-->
+<!--[if IE 8]>    <body class="ie ie8" onload="start_javascript();"> <![endif]-->
+<!--[if IE 9]>    <body class="ie ie9" onload="start_javascript();"> <![endif]-->
+<!--[if gt IE 9]> <body onload="start_javascript();">             <![endif]-->
+<!--[if !IE]>     --> <body> <!--    <![endif]-->
+    <div id="header">
+      <h1><a href="#URL_SITE_SPIP" accesskey="1">[<img src="IMG/(#LOGO_SITE_SPIP|fichier)" alt="#NOM_SITE_SPIP" />]</a></h1>
+      <INCLURE{fond=inc/banner_haut}>
+      <INCLURE{fond=inc/outils}{env}{ajax}>
+    </div>
+    <INCLURE{fond=inc/menu}>
+    <div id="niveau1" style="padding-bottom:3ex">
+      <div class="colonne1">
+      <INCLURE{fond=inc/contenu_profilperso}>
+      </div>
+      <div class="colonne2">#SESSION
+
+        <INCLURE{fond=inc/form_repertoire}>
+        <INCLURE{fond=inc/derniers_inscrits_mur}>
+      </div>
+    </div>
+    <div class="clear"></div>
+    <div id="niveau2_wrap">
+      <div id="niveau2">
+	<div class="colonne1">
+          <div id="panel-left">
+            <INCLURE{fond=inc/contenu_profilperso_retrouvezartistes}>
+            <INCLURE{fond=inc/user_list}{env}/>
+          </div>
+
+	<INCLURE{fond=inc/mur}{env}{ajax}/>
+
+        <div class="colonne2">
+
+	[(#REM) desactivé - conflict avec le chat <INCLURE{fond=inc/decouvrir}>]
+          <INCLURE{fond=inc/form_newsletter}>
+          <INCLURE{fond=inc/services}>
+	</div>
+	<div class="clear"></div>
+
+		<INCLURE{fond=inc/salon}{env}{self=#SELF}/>
+      </div>
+    </div>
+    <div id="footer">
+      <INCLURE{fond=inc/footer}>
+    </div>
+  </body>
+</html>
+</BOUCLE_princ>
+
+</B_princ>

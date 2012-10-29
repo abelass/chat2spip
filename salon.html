@@ -1,0 +1,83 @@
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+#CACHE{0}
+
+      <!--   <script type="text/javascript" src="[(#URL_PAGE{settings}|parametre_url{id_salon,#ENV{salons_actif}})]"></script>-->
+         
+         
+     #SET{salons,#ENV{salons_liste}|explode{|}}
+
+<B_salons>
+<div id="chat">
+<BOUCLE_salons(CHAT_SALONS) {id_salon IN #ENV{salons_actif}}>
+
+ 	[(#ENV{salons_actif}|=={#ID_SALON}|oui)
+ 	
+ 	#SET{login_user,#NOM|replace{#SESSION{login},''}|replace{'_',''}}
+
+	<h3 class="fermer" id="[(#NOM|get_file)]-#ID_SALON-[(#VAL{salons}|session_chat|implode{|})]">
+		<span>[(#CHEMIN{[(#GET{login_user}|logo_participant{auteur,login})]}|image_reduire{40})]</span>
+		[(#GET{login_user}|nom_utilisateur)]
+		 <span>&nbsp;X</span></h3>
+
+	<div class="chat-wrap">
+			<div id="chat-area_#ID_SALON" class="chat-area"></div>
+		
+	</div
+	
+	<form id="send-message-area_#ID_SALON" action="" name="chat">
+		<input  type="hidden" name="id_salon" value="#ID_SALON"/>
+		<input  type="hidden" name="file" value="[(#NOM|get_file)]"/>			
+		<textarea id="sendie" maxlength='100' login_utilisateur="#GET{login_user}" file="[(#NOM|get_file)]" name="message"></textarea>
+		[(#REM) désactivé<div class="smiley_bar">
+			<span class="smiley" id=":)">
+			<img alt="" src="#CHEMIN{img_pack/smiles/happy.png}"/>
+			</span>
+			<span class="smiley" id=":D">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/grin.png}"/>
+			</span>	
+			<span class="smiley" id=":p">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/tongue.png}"/>
+			</span>	
+			<span class="smiley" id=":(">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/sad.png}"/>
+			</span>	
+			<span class="smiley" id="angel">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/angel.png}"/>
+			</span>	
+			<span class="smiley" id=";)">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/winky.png}"/>
+			</span>		
+			<span class="smiley" id="(blush)">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/shame.png}"/>
+			</span>														
+			<span class="smiley" id="(puke)">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/cha-ching.png}"/>
+			</span>		
+			<span class="smiley" id="<3">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/heart.png}"/>
+			</span>	
+			<span class="smiley" id=":S">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/worried.png}"/>
+			</span>					
+			<span class="smiley" id="(devil)">
+			<img  alt="" src="#CHEMIN{img_pack/smiles/devil.png}"/>
+			</span>
+			<span class="smiley" id=";(">
+			<img alt=""  src="#CHEMIN{img_pack/smiles/weepy.png}"/>
+			</span>													
+		</div>
+	</form>]
+	[(#ENV{salons_actif}|=={#ID_SALON}|non)
+		<div class="chat_inactive">
+		<span class="ouvrir" id="[(#NOM|get_file)]-#ID_SALON-[(#VAL{salons}|session_chat|implode{|})]">[(#NOM|replace{#SESSION{login},''}|replace{'_',''})]</span>
+		<span class="eliminer" id="[(#NOM|get_file)]-#ID_SALON-[(#VAL{salons}|session_chat|implode{|})]">x</span>		
+		</div>
+
+	]
+	]
+	</BOUCLE_salons>
+	</div>
+</B_salons>
+
+
+

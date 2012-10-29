@@ -1,0 +1,8 @@
+#SET{donnees,#ARRAY}
+<BOUCLE_messages_jour(CHAT_MESSAGES){date>=#ENV{date_debut}}{date<=#ENV{date_fin}}{login}{par date}>
+[(#COMPTEUR_BOUCLE|=={1}|oui)#SET{donnees,#GET{donnees}|array_merge{#ARRAY{date_debut,#DATE}}}]
+[(#COMPTEUR_BOUCLE|=={#TOTAL_BOUCLE}|oui)#SET{donnees,#GET{donnees}|array_merge{#ARRAY{date_fin,#DATE}}}]
+</BOUCLE_messages_jour>
+	#SET{donnees,#GET{donnees}|array_merge{#ARRAY{compteur,#TOTAL_BOUCLE}}}
+</B_messages_jour>
+[(#GET{donnees}|serialize)]

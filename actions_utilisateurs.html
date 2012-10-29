@@ -1,0 +1,102 @@
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+<?php
+
+	$arg=_request('args');
+	
+	// On récupère les infos de l'argument
+	@list($action,$id_utilisateur,$option) = explode('|', $arg);
+
+
+	//include_spip('inc/cookie');
+	include_spip('inc/session');
+	
+	//$nom_cookie = $GLOBALS['cookie_prefix'].'_chat2spip';
+	
+	$login_session=session_get('login');
+	
+	$session=sql_fetsel('amies,bloques','spip_chat_utilisateurs','login='.sql_quote($login_session));
+	
+
+	if($amies=$session['amies'])$amies=unserialize($session['amies']);
+	if($bloques=$session['bloques'])$bloques=unserialize($session['bloques']);	
+	
+	echo $arg;
+	
+	switch($action){
+		case 'devenir_amie':
+		
+			$amies_nouveau=array(0=>$id_utilisateur);
+			
+			if(is_array($amies))$amies=array_merge($amies_nouveau,$amies);
+			else $amies =$amies_nouveau;
+			if(is_array($bloques)){
+				foreach($bloques AS $key=>$bloque){
+				if($id_utilisateur == $bloque)unset($bloques[$key]);
+				}
+			}
+			
+			if($bloques)$bloques=serialize($bloques);
+		
+			sql_updateq('spip_chat_utilisateurs',array('amies'=>serialize($amies),'bloques'=>$bloques),'login='.sql_quote($login_session));
+	
+		break;
+		
+		case 'enlever_amie':
+			if(is_array($amies)){
+				foreach($amies AS $key=>$amie){
+					if($id_utilisateur == $amie)unset($amies[$key]);
+				}
+			}
+			sql_updateq('spip_chat_utilisateurs',array('amies'=>serialize($amies)),'login='.sql_quote($login_session));
+			
+		break;
+		
+		case 'bloquer_utilisateur':
+		
+			$bloque_nouveau=array(0=>$id_utilisateur);
+			
+			if(is_array($bloques))$bloques=array_merge($bloque_nouveau,$bloques);
+			else $bloques =$bloque_nouveau;
+			
+			if(is_array($amies)){
+				foreach($amies AS $key=>$amie){
+					if($id_utilisateur == $amie)unset($amies[$key]);
+				}
+			}
+		
+			if($amies)$amies=serialize($amies);
+			
+			sql_updateq('spip_chat_utilisateurs',array('amies'=>$amies,'bloques'=>serialize($bloques)),'login='.sql_quote($login_session));
+	
+		break;		
+		
+		case 'debloquer_utilisateur':
+		
+			if(is_array($bloques)){
+				foreach($bloques AS $key=>$bloque){
+				if($id_utilisateur == $bloque)unset($bloques[$key]);
+				}
+			}
+		
+			sql_updateq('spip_chat_utilisateurs',array('bloques'=>serialize($bloques)),'login='.sql_quote($login_session));
+	
+		break;
+				
+		case 'changer_statut':
+		
+			sql_updateq('spip_chat_utilisateurs',array('statut'=>$option),'login='.sql_quote($login_session));
+			
+	
+		break;	
+				
+		case 'changer_vue':
+		
+			sql_updateq('spip_chat_utilisateurs',array('vue'=>$option),'login='.sql_quote($login_session));
+			
+	
+		break;				
+				
+	}
+	return;
+
+?>

@@ -1,0 +1,14 @@
+#CACHE{0}
+
+<div id="rooms">
+	<h3>Rooms</h3>
+	<B_salles>
+		<ul>
+		<BOUCLE_salles(CHAT_SALONS)>
+		<li>
+			<a href="[(#URL_PAGE{chat}|parametre_url{view,salon}|parametre_url{nom,#NOM})]">#NOM<span>Users chatting: <strong>#NUMOFUSERS</strong></span></a>
+		</li>
+		</BOUCLE_salles>
+		</ul>					
+	</B_art>
+</div>

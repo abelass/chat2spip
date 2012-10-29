@@ -1,0 +1,293 @@
+.chat_inactive span,
+h3.fermer,.ouvrir_salon,
+.devenir_amie, 
+.voir_amies, 
+.voir_tous, 
+.voir_bloques,
+.statut,
+.detail_utilisateur,
+.voir h3 span {cursor:pointer}
+
+#box_user_list
+	{
+		position:fixed;
+		bottom: -2px;
+		left: 100px;
+		background-color:white;
+		border:1px solid #8f0133;
+		width: 246px;
+		z-index:1002;
+	}
+	
+	#box_user_list .voir
+		{
+			position:absolute;
+			background-image: url("../images/persoGauche.png");
+			background-repeat:repeat;
+			height:150px;
+			width:306px;
+			top:-150px;
+			left:-1px;
+		}
+		
+	#box_user_list ul li
+		{
+			position: relative;
+			list-style-type:none;
+			min-height:60px;
+			background-image:none;
+			padding:0 10px;
+		}
+		#box_user_list ul li:hover{background-color:#f49c1e;}
+		#box_user_list ul li.titre
+			{
+				color:#8f0133;
+				font-family:georgia;
+				font-size:14px;
+				font-weight:bold;
+				min-height:20px;
+				text-align:left;
+				padding:5px;
+			}
+			#box_user_list ul li.titre:hover{background-color:white;}
+			
+	
+	#box_user_list h3 small
+		{
+			position:absolute;
+			bottom:6px;
+			left: 45px;
+			color:#fff;
+			text-transform:capitalize;
+			font-size:12px;
+			font-weight:normal;
+		}
+		
+	#box_user_list h3 img
+		{
+			position:absolute;
+			bottom:10px;
+			left:10px;
+		}
+		
+	#box_user_list h3 span span.nom
+		{
+			position:absolute;
+			bottom:20px;
+			font-size:18px;
+			left:45px;
+			color:#fff;
+			text-transform:capitalize;
+			font-family:times;
+			font-weight:normal;
+		}
+	
+	#userlist{min-height:30px; max-height:350px;overflow:auto;}
+	
+	.fermer_userlist
+		{
+			position:absolute;
+			bottom:35px;
+			right:65px;
+			color:#d27b9b;
+			font-family: arial;
+			font-size:10px;
+		}
+		.fermer_userlist:hover{color:yellow;}
+
+	.ouvrir_userlist
+		{
+			position:absolute;
+			bottom:35px;
+			right:80px;
+			color:#d27b9b;
+			font-family: arial;
+			font-size:24px;
+		}
+		.ouvrir_userlist:hover{color:yellow;}
+	
+	.logo
+		{
+			top:2px;
+		}
+		
+		.logo img
+		{
+			position:absolute;
+			top: 5px;
+			left: 5px;
+			height:40px;
+			width:40px;
+			border: #ddd 1px solid;
+		}
+		
+		.logo span
+		{
+			position:absolute;
+			top: 5px;
+			left: 60px;
+			color:black;
+			font-family:georgia;
+			text-transform:capitalize;
+		}
+		
+		.logo span img
+		{
+			position:absolute;
+			height:32px;
+			width:32px;
+			top: -15px;
+			left: -30px;
+			color:black;
+			font-family:georgia;
+			text-transform:capitalize;
+			border:none;
+		}
+		
+		div.detail_utilisateur{position:absolute;top:25px;left:60px;}
+		div.detail_utilisateur img.icone{display:inline;margin:3px 0 0 0;}
+		div.detail_utilisateur span{display:none;color:black;}
+		div.detail_utilisateur:hover{display:block;}
+		div.detail_utilisateur:hover span{display:inline;margin-right:5px;width:16px;}
+		div.detail_utilisateur:hover img.icone{display:none;}
+		
+		div.detail_utilisateur:hover span.devenir_amie:after
+			{
+				content:"Favoris";
+				display:inline;
+				margin: 0px 5px;
+			}
+			
+		div.detail_utilisateur:hover span.enlever_amie:after
+			{
+				content:"Favoris";
+				display:inline;
+				margin: 0px 5px;
+			}
+			
+		div.detail_utilisateur:hover span.bloquer_utilisateur:after
+			{
+				content:"Bloquer";
+				display:inline;
+				margin: 0px 5px;
+			}
+		
+		div.detail_utilisateur:hover span.debloquer_utilisateur:after
+			{
+				content:"D�bloquer";
+				display:inline;
+				margin: 0px 5px;
+			}
+		
+#chat-box
+	{
+		position:fixed;
+		bottom: -2px;
+		right: 10px;
+		background-color:white;
+		border:1px solid #8f0133;
+		width: 300px;
+		z-index:1003;
+	}
+	
+	#chat h3
+		{
+			position:absolute;
+			background-image:url("../images/persoDroite.png");
+			height:9px;
+			width:282px;
+			color:#fff;
+			font-size:18px;
+			text-transform:capitalize;
+			text-align:center;
+			padding-top:110px;
+			padding-bottom:18px;
+			padding-left:10px;
+			padding-right:10px;
+			top:-138px;
+			left:-1px;
+		}
+	
+	#chat h3 span img
+		{
+			display:none;
+			position:absolute;
+			bottom:5px;
+			left: 5px;
+			height:40px!important;
+			width:40px!important;
+		}
+		
+	#chat h3 span+span
+		{
+			position:absolute;
+			bottom:30px;
+			right:5px;
+			font-size:10px;
+			font-family:arial;
+			color:#d27b9b;
+		}
+		#chat h3 span+span:hover{color:yellow;}
+		
+	#chat div.chat-wrap{color:black;text-align:left;}
+	#chat div div.chat-area
+		{
+			width:295px;
+			margin:5px auto;
+			max-height:250px;
+			overflow:auto;
+			padding-bottom: 10px;
+			font-size:12px;
+		}
+	
+	#chat div div.chat-area div
+		{
+			margin-top:20px;
+			margin-bottom:2px;
+			padding-bottom:2px;
+			border-bottom: 1px #bfbfbf dotted;
+		}	
+	
+.chat-wrap{padding:0}
+
+.chat-area p{width:200px;}
+
+.chat-area div{position:relative;}
+
+.chat-area span.nick{
+	font-size:16px; margin-right:5px;
+}
+
+.chat-area span.date{
+	position:absolute;bottom:0;right:30px;
+}
+.chat-area span.time{
+	position:absolute;bottom:0;right:0;
+}
+
+#sendie {
+	background-image:url("../images/tchatIcoPetit.jpg");
+	background-repeat:no-repeat;
+	background-position: 0px 10px;
+	padding: 10px 10px 10px 26px;
+	margin-left:-1px;
+	margin-bottom:-1px;
+	max-height: 300px; 
+	overflow: auto; 
+	color:black;
+	width:264px;
+	height:20px;
+	font-size:12px;
+	text-align:left;
+	border:1px solid #8f0133;
+}
+
+.chat_inactive{
+
+background-color: #f18519;
+
+}
+
+.smiley_bar {width:160px;}
+
+.ouvrir_userlist img{position:absolute; bottom:-40px; left:-250px;}

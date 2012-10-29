@@ -1,0 +1,17 @@
+#CACHE{0}
+#SET{session_chat,#VAL{salon_actif}|session_chat}
+<div id="box_user_list">
+	<div id="box_user_list_visible">
+		<div class="voir">
+			<INCLURE{fond=user_tools}{session}/>
+		</div>	
+		<div id="userlist"></div>
+	</div>
+	<div id="box_user_list_invisible" class="inactive">
+		<span class="ouvrir_userlist" style="display:none;">
+			<img src="#CHEMIN{images/tchatIconGris.png}" alt="Icone chat"/>
+		</span>
+	</div>	
+</div>	
+
+

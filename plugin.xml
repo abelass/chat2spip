@@ -1,0 +1,39 @@
+<plugin>
+	<nom> <!-- Nom du plugin -->
+	<multi>[fr]Chat simple pour spip</multi> (SPIP 2.0+)
+	</nom>
+	<icon>img_pack/form-24.png</icon>
+	<auteur><a href="http://www.mychacra.net">Rainer Müller</a></auteur>
+	<version>
+	0.3.0
+	</version>
+	<version_base>0.2.1</version_base>
+	<etat>
+	test
+	</etat>
+	<description>
+	<multi>
+		[fr]Chat inspiré du script de  [Chris Coyier->http://css-tricks.com/chat2/]
+	</multi>
+	</description>
+	<prefix>
+	chat2spip
+	</prefix>
+	<install>base/chat2spip_install.php</install>
+	<pipeline>
+		<nom>declarer_tables_interfaces</nom>
+		<inclure>base/chat2spip_tables_interfaces.php</inclure>
+	</pipeline>		
+	<pipeline>
+		<nom>declarer_tables_principales</nom>
+		<inclure>base/chat2spip_tables_principales.php</inclure>
+	</pipeline>
+	<pipeline>
+		<nom>insert_head</nom>
+		<inclure>chat2spip_pipelines.php</inclure>
+	</pipeline>	
+	
+	<fonctions>chat2spip_fonctions.php</fonctions>
+	<chemin dir='' />
+	<categorie>communication</categorie>
+</plugin>

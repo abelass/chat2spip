@@ -1,0 +1,234 @@
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+#CACHE{0}
+
+
+<?php
+/* 
+Author: Kenrick Beckett
+Author URL: http://kenrickbeckett.com
+Name: Chat Engine 2.0
+
+*/
+
+include_spip('dbcon');
+
+include_spip('inc/filtres_images');
+include_spip('inc/session');
+include_spip('ecrire/inc/actions');
+include_spip('chat2spip_fonctions');
+
+$url_retour=_request('url_chat');
+$args=_request('options');
+
+
+
+		
+//Start Array
+$data = array();
+// Get data to work with
+		$current = cleanInput(_request('current'));
+
+		$username = session_get('login');
+		
+		$now = time();
+// INSERT your data (if is not already there)
+       		$findUser = sql_fetsel('*','spip_chat_utilisateurs','login='.sql_quote($username));
+
+	// Temp d'exécutin de la requête				
+	$finish = time() + 7;  
+	     		
+	// Changement lors d'une action affectant la liste des utilisateur	     		
+	if($args){
+		$data['actualisation'] ='ok';
+		$finish = time();	
+		}
+		
+
+       		
+		if($findUser['salons'])$session_salons=unserialize($findUser['salons']);	
+		
+		if($findUser['amies'])$session_amies=unserialize($findUser['amies']);
+		
+		if($findUser['bloques'])$session_bloques=unserialize($findUser['bloques']);
+		
+		if(!$findUser)
+				{
+					$findUser['id_utilisateur']=sql_insertq('spip_chat_utilisateurs',array('id_auteur'=>$id_auteur,'time_mod'=>$now,'login'=>$username));
+				}
+								
+								
+			
+		// On actualise le timemod pour monterer qu'on es online	
+		sql_updateq('spip_chat_utilisateurs',array('time_mod'=>$now),'login='.sql_quote($username));
+				
+				
+		// Séléction des utilisateurs selon les vue choisis	
+		
+		//Définition des vues
+		$vue=$findUser['vue'];
+		
+		$vues=array(0=>'tous',1=>'amie',2=>'bloque');		
+		
+		// Défaut
+		 $where='statut=1  AND id_utilisateur!='.$findUser['id_utilisateur'];
+		 
+		 
+		// Défaut si des utilisateurs sont bloqués
+		 if(is_array($session_bloques)) {
+				if(count($session_bloques)>0)$where='statut=1 AND id_utilisateur !IN ('.implode(',',$session_bloques).')';
+				}
+				
+		// Vue amies	
+		if ($vue=='amies'){
+			if(is_array($session_amies)){
+				if(count($session_amies)>0) $where='statut=1  AND id_utilisateur IN ('.implode(',',$session_amies).')';
+				}
+			}
+
+		// Vue amies et non spécifiés
+		if ($vue=='tous'){
+			if(count($session_bloques)>0){if(is_array($session_bloques)) $where='statut=1 AND id_utilisateur !='.$findUser['id_utilisateur'].' AND id_utilisateur NOT IN ('.implode(',',$session_bloques).')';
+			}
+			}
+	
+		// Les bloqués
+		if ($vue=='bloques'){
+			if(is_array($session_bloques)) {
+				if(count($session_bloques)>0)$where='statut=1 AND id_utilisateur IN ('.implode(',',$session_bloques).')';
+				}
+			}
+			
+		$getRoomUsers = sql_select('*','spip_chat_utilisateurs',$where);
+		
+		$check = sql_count($getRoomUsers);
+	    while(true)
+		{
+			usleep(10000);
+			sql_updateq('spip_chat_utilisateurs',array('time_mod'=>$now,'statut'=>1),'statut =0 AND login='.sql_quote($username));
+			
+
+			$olduser = time() - 5;
+			$eraseuser = time() - 30;
+
+			sql_updateq('spip_chat_utilisateurs',array('statut'=>0),'statut =1 AND time_mod < '.$eraseuser);
+			$getRoomUsers = sql_select('*','spip_chat_utilisateurs',$where);
+			$check = sql_count($getRoomUsers);
+			$now = time();
+			if($now <= $finish)
+			{
+				mysql_query("UPDATE `chat_users_rooms` SET `mod_time` = '$now' WHERE `username` = '$username' AND `room` ='$room'  LIMIT 1") ;
+				if($check != $current){
+				 break;
+				}
+			}
+			else
+			{
+				 break;	
+		    }
+        }	 		
+// Get People in chat
+		if(sql_count($getRoomUsers) != $current OR $findUser['avis_chat'])
+		{
+			$data['numOfUsers'] = sql_count($getRoomUsers);
+			// Get the user list (Finally!!!)
+			$data['userlist'] = array();
+			while($user = sql_fetch($getRoomUsers)){
+				$data['userlist'][] = details_utilisateur($user,$findUser,$session_salons,$url_retour,$session_amies,$session_bloques);
+			}
+		}
+		else
+		{
+			$data['numOfUsers'] = $current;	
+			while($user = sql_fetch($getRoomUsers))
+			{
+				$data['userlist'][] = details_utilisateur($user,$findUser,$session_salons,$url_retour,$session_amies,$session_bloques);
+			}
+		}
+		
+	if(_request('actualisation')) $data['actualisation']='ok';
+
+
+
+		echo json_encode($data);
+		
+		
+// pepare le détail des l'affichageutilisateur	
+	
+function details_utilisateur($user,$findUser,$session_salons,$url_retour,$session_amies='',$session_bloques=''){	 	
+	unset($user['salons']);
+	unset($avis_chat);	
+	unset($avis);	
+	
+		if($user['salons'])$user_salons=unserialize($user['salons']);	
+				
+		$id_aut=sql_getfetsel('id_auteur','spip_auteurs','login='.sql_quote($user['login']));
+		
+		$id_salon=user_salon($user_salons,$session_salons,$user['id_utilisateur'],$findUser['id_utilisateur']);
+		
+		if($id_salon !='new')$file=get_file($id_salon,'id_salon');
+		else $user_bloques=array();	
+		
+	
+		$salons=session_chat('salons');
+	
+		
+		if(is_array($salons)){
+			$salon_nouveau=array(0=>$id_salon);
+			$salons=array_merge($salon_nouveau,$salons);
+			$salons=implode('|',$salons);
+		 }
+		else $salons=$id_salon;
+		
+		$id=$file.'-'.$id_salon.'-'.$salons;
+		
+		if ($findUser['avis_chat']){
+			$avis_chat=unserialize($findUser['avis_chat']);
+			if(in_array($user['id_utilisateur'],$avis_chat)){
+				$Id_suppl.='-enlever_avis';		
+				$avis='<a  href="'.generer_action_auteur('chat_salon','ouvrir_salon|'.$id_salon.'|'.$user['id_utilisateur'].'|enlever_avis',$url_retour).'" title="nouveau message"><img src="'.find_in_path('img_pack/bubble_16.png').'" alt="avis"/></a>';
+				/*$avis= '<span class="ouvrir_salon" id="'.$id.'-'.$user['id_utilisateur'].$Id_suppl.'-nouveau"><img src="'.find_in_path('img_pack/bubble_16.png').'" alt="avis"/></span>';	*/
+				}
+			
+			}
+
+		//$ouvrir_salon='<a href="'.generer_action_auteur('chat_salon','ouvrir_salon|'.$id_salon.'|'.$user['id_utilisateur'],$url_retour).'">'.$user['login'].'</a>';
+		
+		
+		if(is_array($session_amies)){
+			if(!in_array($user['id_utilisateur'],$session_amies)) {
+				$amie='<a class="devenir_amie" href="'.generer_action_auteur('utilisateurs','devenir_amie|'.$user['id_utilisateur'],$url_retour).'" title="ajouter comme amie"><img src="'.find_in_path('img_pack/heart_16.png').'" alt="amie"/></a>';
+				//$amie ='<span class="devenir_amie" id="'.$findUser['login'].'-'.$user['id_utilisateur'].'"><img src="'.find_in_path('img_pack/heart_16.png').'" alt="amie"/></span>';
+				}
+			else {
+				$enlever_amie='<a class="enlever_amie" href="'.generer_action_auteur('utilisateurs','enlever_amie|'.$user['id_utilisateur'],$url_retour).'" title="enlever comme amie"><img src="'.find_in_path('img_pack/user_16.png').'" alt="enelver amie"/></a>';
+				//$enlever_amie ='<span class="enlever_amie">sgfhsdf</span>';
+				}
+			}				
+		else {
+				$amie='<a class="devenir_amie" href="'.generer_action_auteur('utilisateurs','devenir_amie|'.$user['id_utilisateur'],$url_retour).'" title="ajouter comme amie"><img src="'.find_in_path('img_pack/heart_16.png').'" alt="amie"/></a>';
+				//$amie ='<div class="devenir_amie">sdfqsdf</div>';
+		}
+			
+
+		if(is_array($session_bloques)){	
+		if(!in_array($user['id_utilisateur'],$session_bloques)) {
+			$bloquer='<a class="bloquer_utilisateur" href="'.generer_action_auteur('utilisateurs','bloquer_utilisateur|'.$user['id_utilisateur'],$url_retour).'" title="bloquer cet utilisateur"><img src="'.find_in_path('img_pack/stop_16.png').'" alt="amie"/></a>';
+			}
+			else{
+			$debloquer='<a class="debloquer_utilisateur" href="'.generer_action_auteur('utilisateurs','debloquer_utilisateur|'.$user['id_utilisateur'],$url_retour).'" title="debloquer cet utilisateur"><img src="'.find_in_path('img_pack/user_16.png').'" alt="amie"/></a>';
+			}			
+		}
+		else{
+			$bloquer='<a class="bloquer_utilisateur" href="'.generer_action_auteur('utilisateurs','bloquer_utilisateur|'.$user['id_utilisateur'],$url_retour).'" title="bloquer cet utilisateur"><img src="'.find_in_path('img_pack/stop_16.png').'" alt="amie"/></a>';
+		}
+
+
+		
+		$ouvrir_salon= '<span class="ouvrir_salon" id="'.$id.'-'.$user['id_utilisateur'].$Id_suppl.'">'.$user['login'].'</span>';	
+				
+		$link = $avis.$enlever_amie.$amie.$bloquer.$debloquer;	
+			
+		$details	='<span class="logo">'.image_reduire(find_in_path(logo_participant($id_aut)),20,20).$ouvrir_salon.'</span><div class="detail_utilisateur">'.$link.'</div>';
+	return $details;
+}		
+?>

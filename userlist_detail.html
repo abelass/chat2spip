@@ -1,0 +1,26 @@
+#CACHE{0}
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+[(#ENV{userlist}|!={undefined}|oui)#SET{userlist,#ENV{userlist}|replace{',','-'}|explode{-}}]
+#SET{titres,#ARRAY{0,amis,1,autres}}
+<B_art>
+	<ul>
+	<BOUCLE_art(POUR){tableau #GET{userlist}}>
+		#SET{explode,''}
+		#SET{explode,#VALEUR|explode{|}}
+		[(#GET{explode}|valeur_tableau{0}|oui)
+			[(#GET{explode}|valeur_tableau{0}|in_array{#GET{titres}}|oui)
+			<li class="titre">[(#GET{explode}|valeur_tableau{0}|=={amis}|?{Amis,Autres contacts})]</li>
+			]
+			[(#GET{explode}|valeur_tableau{0}|in_array{#GET{titres}}|non)
+			[
+			<li>
+				(#SESSION{utilisateur_chat}|liens_utilisateur{[(#GET{explode}|valeur_tableau{0})],[(#GET{explode}|valeur_tableau{1})]})
+			</li>]
+			]
+		]
+		#SET{explode,''}
+	</BOUCLE_art>
+	</ul>
+</B_art>
+Personne en ligne
+<//B_art>

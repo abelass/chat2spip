@@ -1,0 +1,255 @@
+#HTTP_HEADER{Content-Type: text/html; charset=#CHARSET}
+#CACHE{0}
+
+
+<?php
+/* 
+Author: Kenrick Beckett
+Author URL: http://kenrickbeckett.com
+Name: Chat Engine 2.0
+
+*/
+
+include_spip('dbcon');
+
+include_spip('inc/filtres_images');
+include_spip('inc/session');
+include_spip('inc/cookie');
+include_spip('ecrire/inc/actions');
+include_spip('chat2spip_fonctions');
+
+$args=_request('options');
+$salon_actif=_request('salon_actif');
+
+
+		
+//Start Array
+$data = array();
+// Get data to work with
+		$current = cleanInput(_request('current'));
+
+		$username = session_get('login');
+		
+		$now = time();
+// INSERT your data (if is not already there)
+       		$findUser = sql_fetsel('*','spip_chat_utilisateurs','login='.sql_quote($username));
+
+			
+       		
+	$finish = time() + 7;       		
+	if($args){
+		$data['actualisation'] ='ok';
+		$finish = time();	
+		}
+		
+
+		$vue=$findUser['vue'];
+		
+		//préparations des arrays sorties de la bd
+       		
+		if($findUser['salons'])$session_salons=unserialize($findUser['salons']);	
+		
+		if($findUser['amies'])$session_amies=unserialize($findUser['amies']);
+	
+		
+		if($findUser['bloques'])$session_bloques=unserialize($findUser['bloques']);
+		
+		if(!$findUser)
+				{
+					$findUser['id_utilisateur']=sql_insertq('spip_chat_utilisateurs',array('id_auteur'=>$id_auteur,'time_mod'=>$now,'login'=>$username));
+				}				
+
+		
+		// Déterminer s'il faut ouvrir une fenêtre du chat
+
+
+		$nom_cookie = $GLOBALS['cookie_prefix'].'_chat2spip';
+		
+		if($cookie=$_COOKIE[$nom_cookie])$utilisateur_session=unserialize($cookie);
+
+		//faire en sorte que actualiser=salon ne se déclenche uniquement quand on change de salon
+		if($table_actif=$session_salons['actif']){
+			if($table_actif  !=$salon_actif){
+	
+				$file=get_file($table_actif,'id_salon');
+	
+				$id=$file.'-'.$table_actif.'-'.$salons;
+				$actualiser ='salon';
+				$finish = time();	
+				$args_actualiser=$id.'-'.$findUser['id_utilisateur'];
+			}
+		}
+
+		$vues=array(0=>'tous',1=>'amie',2=>'bloque');
+		$statuts=array(0=>'1',1=>'2',2=>'3');		
+
+		//requête des utilisateurs affichés
+		
+		 $where='statut=1  AND id_utilisateur != '.$findUser['id_utilisateur'];
+		 
+		 /*if(is_array($session_bloques)) {
+				if(count($session_bloques)>0)$where='statut=1 AND id_utilisateur NOT IN ('.implode(',',$session_bloques).')';
+				}*/
+		
+		/*if ($vue=='amies'){
+			$where='statut=500';
+			if(is_array($session_amies)){
+				if(count($session_amies)>0) $where='statut=1  AND id_utilisateur IN ('.implode(',',$session_amies).')  AND id_utilisateur != '.$findUser['id_utilisateur'];
+				}
+			}*/
+
+		/*if ($vue=='tous'){
+			$where='statut=1 AND id_utilisateur != '.$findUser['id_utilisateur'];
+			}*/
+	
+		/*if ($vue=='bloques'){
+			$where='statut=500';
+			if(is_array($session_bloques)) {
+				if(count($session_bloques)>0)$where='statut=1 AND id_utilisateur IN ('.implode(',',$session_bloques).')  AND id_utilisateur != '.$findUser['id_utilisateur'];
+				}
+			}*/
+			
+		$set=array('time_mod'=>$now);		
+				
+			
+		sql_updateq('spip_chat_utilisateurs',$set,'login='.sql_quote($username));		
+		
+		$getRoomUsers = sql_select('*','spip_chat_utilisateurs',$where);
+		
+		$check = sql_count($getRoomUsers);
+	    while(true)
+		{
+			usleep(10000);
+			sql_updateq('spip_chat_utilisateurs',array('time_mod'=>$now,'statut'=>1),'statut=0 AND login='.sql_quote($username));
+			
+
+			$olduser = time() - 5;
+			$eraseuser = time() - 30;
+
+			
+			sql_updateq('spip_chat_utilisateurs',array('statut'=>0),'statut =1 AND time_mod < '.$eraseuser);
+			
+			$getRoomUsers = sql_select('*','spip_chat_utilisateurs',$where);
+			$check = sql_count($getRoomUsers);
+			$now = time();
+			if($now <= $finish)
+			{
+				/* Pas de conttrole sur le statut online mysql_query("UPDATE `chat_users_rooms` SET `mod_time` = '$now' WHERE `username` = '$username' AND `room` ='$room'  LIMIT 1") ;
+				*/
+				if($check != $current){
+				 break;
+				}
+			}
+			else
+			{
+				 break;	
+		    }
+        }	 		
+// Get People in chat
+		unset($liste_amies);
+		if(sql_count($getRoomUsers) != $current OR $findUser['avis_chat'])
+		{
+			$data['numOfUsers'] = sql_count($getRoomUsers);
+			// Get the user list (Finally!!!)
+			$liste_amies = array();	
+			$liste_bloques = array();	
+			$liste_neutres = array();	
+									
+			while($user = sql_fetch($getRoomUsers)){
+			
+				//On affiche seulement si pas bloqué par l'utilisateur
+				$bloquer='non';
+				$flag='rien';
+
+				if($user['bloques']){
+					$bloques=unserialize($user['bloques']);
+					if(is_array($bloques)){
+						if (in_array($findUser['id_utilisateur'],$bloques))$bloquer='ok';
+						}
+					}
+				
+				if($bloquer=='non'){
+					//On liste selon le type d'utilisateur
+					if(is_array($session_amies)) {
+						if(in_array($user['id_utilisateur'],$session_amies)){
+							$liste_amies[]=$user['id_utilisateur'];
+							$flag='ok';
+							}
+						}
+					if(is_array($session_bloques) AND $flag!='ok') {
+						if(in_array($user['id_utilisateur'],$session_bloques)){
+							$liste_bloques[]=$user['id_utilisateur'];
+							$flag='ok';	
+							}				
+						}
+						
+					if($flag!='ok') $liste_neutres[]=$user['id_utilisateur'];					
+
+					}
+				}
+			}
+		else
+		{
+			$data['numOfUsers'] = $current;	
+			$liste_amies = array();	
+			$liste_bloques = array();	
+			$liste_neutres = array();								
+			while($user = sql_fetch($getRoomUsers)){
+			
+				//on affiche seulement si pas bloqué par l'utilisateur
+				$bloquer='non';
+				$flag='rien';
+				if($user['bloques']){
+					$bloques=unserialize($user['bloques']);
+					if(is_array($bloques)){
+						if (in_array($findUser['id_utilisateur'],$bloques))$bloquer='ok';
+						}
+					}
+					
+				if($bloquer=='non'){
+										//On liste selon le type d'utilisateur
+					if(is_array($session_amies)) {
+						if(in_array($user['id_utilisateur'],$session_amies)){
+							$liste_amies[]=$user['id_utilisateur'];
+							$flag='ok';
+							}
+						}
+					if(is_array($session_bloques) AND $flag!='ok') {
+						if(in_array($user['id_utilisateur'],$session_bloques)){
+							$liste_bloques[]=$user['id_utilisateur'];
+							$flag='ok';	
+							}					
+						}
+					if($flag!='ok') $liste_neutres[]=$user['id_utilisateur'];					
+					}
+				}
+			
+		}
+		
+	if(_request('actualisation') ) $data['actualisation']='ok';
+	
+	if($actualiser){
+		$data['actualisation']=$actualiser;
+		$data['args']=$args_actualiser;
+		}
+	
+	//echo serialize($liste_amies).serialize($liste_neutres);
+	$titre_amie=array();
+	$titre_autres=array();
+	
+	if(count($liste_amies)>0){
+		$titre_amie=array(0=>'amis');
+		}
+	if(count($liste_neutres)>0 OR count($liste_bloques)>0){
+		$titre_autres=array(0=>'autres');
+		}
+	$data['salon_actif']=$table_actif;
+	$data['userlist'] = array_merge($titre_amie,$liste_amies,$titre_autres,$liste_neutres,$liste_bloques);	
+
+	echo json_encode($data);
+		
+		
+// pepare le détail des l'affichageutilisateur	
+	
+
+?>
